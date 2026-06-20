@@ -20,36 +20,52 @@
             width: 100%;
             height: 100%;
             overflow: hidden;   /* pas de scroll du tout */
-            font-family: 'Cairo', sans-serif;
-            background: #ffffff;  /* fond blanc comme Word */
+            font-family: 'Cairo', 'Arial', sans-serif;
+            background: #ffffff;  /* fond blanc pur */
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
         }
 
-        /* conteneur central : texte uniquement, sans fioritures */
-        .message-container {
+        /* conteneur principal : tout le contenu vertical */
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            width: 100%;
+            max-width: 700px;
+            padding: 1.5rem 2rem;
+            background: #ffffff;
+        }
+
+        /* HEADER : adresse du site */
+        .header {
+            width: 100%;
+            text-align: center;
+            padding-top: 0.5rem;
+        }
+
+        .site-url {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: #0563c1;
+            text-decoration: underline;
+            letter-spacing: 0.3px;
+        }
+
+        /* CORPS : messages centrés */
+        .body-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 0.8rem;
-            padding: 2rem;
+            flex: 1;
             width: 100%;
-            max-width: 650px;
-            color: #1a1a1a;  /* noir classique */
-            font-family: 'Cairo', 'Arial', sans-serif;
-        }
-
-        /* adresse du site en haut */
-        .site-url {
-            font-size: 1.2rem;
-            font-weight: 400;
-            color: #0563c1;  /* bleu comme un lien Word */
-            text-decoration: underline;
-            margin-bottom: 0.3rem;
-            letter-spacing: 0.3px;
+            color: #1a1a1a;
         }
 
         .main-title {
@@ -84,12 +100,24 @@
             margin-top: 0.2rem;
         }
 
-        /* ligne fine discrète comme un séparateur Word */
+        /* ligne fine décorative */
         .divider {
             width: 100px;
             height: 1px;
             background: #cccccc;
             margin: 0.1rem 0;
+        }
+
+        /* FOOTER : mention de création */
+        .footer {
+            width: 100%;
+            text-align: center;
+            padding-bottom: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: #555555;
+            border-top: 1px solid #eeeeee;
+            padding-top: 0.8rem;
         }
 
         /* responsive pour petits écrans */
@@ -112,6 +140,12 @@
             .invite-message {
                 font-size: 1.1rem;
             }
+            .footer {
+                font-size: 0.8rem;
+            }
+            .page-container {
+                padding: 1rem 1.2rem;
+            }
         }
 
         @media (max-width: 400px) {
@@ -133,12 +167,14 @@
             .invite-message {
                 font-size: 1rem;
             }
+            .footer {
+                font-size: 0.7rem;
+            }
         }
 
         @media (max-height: 550px) {
             .site-url {
                 font-size: 0.9rem;
-                margin-bottom: 0.1rem;
             }
             .main-title {
                 font-size: 2rem;
@@ -154,41 +190,53 @@
             }
             .invite-message {
                 font-size: 1rem;
-                margin-top: 0.1rem;
             }
-            .message-container {
+            .footer {
+                font-size: 0.7rem;
+                padding-top: 0.4rem;
+                padding-bottom: 0.2rem;
+            }
+            .body-content {
                 gap: 0.4rem;
-                padding: 1rem;
             }
             .divider {
                 margin: 0.05rem 0;
+            }
+            .page-container {
+                padding: 0.8rem 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="message-container">
+    <div class="page-container">
 
-        <!-- Adresse du site en haut -->
-        <div class="site-url">lequran.vercel.app</div>
+        <!-- HEADER : adresse du site -->
+        <div class="header">
+            <div class="site-url">lequran.vercel.app</div>
+        </div>
 
-        <!-- 1. قيد الإنشاء -->
-        <div class="main-title">قيد الإنشاء</div>
+        <!-- CORPS : messages centrés -->
+        <div class="body-content">
 
-        <!-- ligne fine décorative -->
-        <div class="divider"></div>
+            <div class="main-title">قيد الإنشاء</div>
 
-        <!-- 2. في آخر اللمسات قبل الإطلاق -->
-        <div class="retouche-line">في آخر اللمسات قبل الإطلاق</div>
+            <div class="divider"></div>
 
-        <!-- 3. الموقع سيكون جاهزاً اليوم -->
-        <div class="sub-line">الموقع سيكون جاهزاً اليوم</div>
+            <div class="retouche-line">في آخر اللمسات قبل الإطلاق</div>
 
-        <!-- 4. إن شاء الله -->
-        <div class="launch-line">إن شاء الله</div>
+            <div class="sub-line">الموقع سيكون جاهزاً اليوم</div>
 
-        <!-- Message d'invitation en bas -->
-        <div class="invite-message">عودوا لزيارة الموقع هذا اليوم</div>
+            <div class="launch-line">إن شاء الله</div>
+
+            <div class="invite-message">عودوا لزيارة الموقع هذا اليوم</div>
+
+        </div>
+
+        <!-- FOOTER : mention de création -->
+        <div class="footer">
+            إنشاء و تصميم : م.الصديق الإدريسي
+        </div>
 
     </div>
 </body>
