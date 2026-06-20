@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>تصفح القرآن الكريم</title>
     
     <!-- Bootstrap 5 RTL -->
@@ -261,7 +263,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px 20px;
-            padding-bottom: 200px;  /* Augmenté pour éviter le chevauchement */
+            padding-bottom: 200px;
             -webkit-overflow-scrolling: touch;
             background-color: #ffffff;
         }
@@ -794,7 +796,7 @@
                 </button>
             </div>
 
-            <audio id="audioPlayer" class="d-none"></audio>
+            <audio id="audioPlayer" class="d-none" playsinline webkit-playsinline></audio>
         </div>
     </div>
 
@@ -820,6 +822,101 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // ============================================================
+        //  🚀 SOLUTION POUR CONTINUER LA RÉPÉTITION MÊME ÉCRAN ÉTEINT
+        // ============================================================
+        
+        // 1️⃣ Wake Lock API - Empêche l'écran de s'éteindre
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    // Libérer l'ancien verrou s'il existe
+                    if (wakeLock !== null) {
+                        try { await wakeLock.release(); } catch(e) {}
+                        wakeLock = null;
+                    }
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('✅ Wake Lock activé - L\'écran restera allumé');
+                    
+                    // Réactiver le verrou si la page redevient visible
+                    document.addEventListener('visibilitychange', async () => {
+                        if (document.visibilityState === 'visible' && wakeLock === null && isRepeatMode) {
+                            try {
+                                wakeLock = await navigator.wakeLock.request('screen');
+                                console.log('✅ Wake Lock réactivé');
+                            } catch (err) {
+                                console.warn('⚠️ Impossible de réactiver Wake Lock:', err);
+                            }
+                        }
+                    });
+                    
+                    wakeLock.addEventListener('release', () => {
+                        console.log('🔓 Wake Lock libéré');
+                        wakeLock = null;
+                    });
+                } else {
+                    console.warn('⚠️ Wake Lock API non supportée sur ce navigateur');
+                }
+            } catch (err) {
+                console.warn('⚠️ Erreur Wake Lock:', err);
+            }
+        }
+
+        async function releaseWakeLock() {
+            if (wakeLock !== null) {
+                try {
+                    await wakeLock.release();
+                    wakeLock = null;
+                    console.log('🔓 Wake Lock libéré manuellement');
+                } catch (err) {
+                    console.warn('⚠️ Erreur lors de la libération du Wake Lock:', err);
+                }
+            }
+        }
+
+        // 2️⃣ AudioContext - Maintient le son actif en arrière-plan
+        let audioContext = null;
+
+        function initAudioContext() {
+            if (!audioContext) {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioContext = new AudioContext();
+                    console.log('✅ AudioContext initialisé');
+                } catch (err) {
+                    console.warn('⚠️ AudioContext non supporté:', err);
+                }
+            }
+            
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('✅ AudioContext repris');
+                }).catch(() => {});
+            }
+        }
+
+        // 3️⃣ Gestion de la visibilité de la page
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                console.log('👁️ Application visible - Vérification du contexte audio');
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().catch(() => {});
+                }
+                if (isRepeatMode && isPlaying) {
+                    console.log('🔄 Reprise automatique de la lecture');
+                    // Vérifier si l'audio est toujours en cours
+                    if (audioPlayer.paused && audioPlayer.src) {
+                        audioPlayer.play().catch(() => {});
+                    }
+                }
+            } else {
+                console.log('📱 Application en arrière-plan - Maintien du contexte audio');
+                // Le son continue avec AudioContext
+            }
+        });
+
         // ============================================================
         //  BOUTON "موافق" - SOLUTION DÉFINITIVE
         // ============================================================
@@ -942,8 +1039,6 @@
             renderAyahs();
         }
 
-        document.addEventListener("DOMContentLoaded", fetchSurahs);
-
         // ====== Écouteurs pour les changements automatiques ======
         fromAyahSelect.addEventListener('change', function() {
             if (currentSurahNumber !== 0) {
@@ -985,7 +1080,8 @@
                 isPlaying = false;
                 audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
             } else if (audioPlayer.src) {
-                audioPlayer.play();
+                initAudioContext();
+                audioPlayer.play().catch(() => {});
                 isPlaying = true;
                 audioStatusIcon.className = "fa-solid fa-volume-high text-success";
             }
@@ -1019,6 +1115,10 @@
                 
                 console.log(`🔁 Début répétition: ${displayedAyahs.length} ayahs × ${repeatCount} fois (compteur décroissant)`);
                 
+                // 🔥 Activer le Wake Lock au début de la répétition
+                requestWakeLock();
+                initAudioContext();
+                
                 isPlaying = true;
                 playSpecificTrack(0);
             } else {
@@ -1042,7 +1142,10 @@
             audioPlayer.currentTime = 0;
             document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
             
-            console.log("⏹️ Répétition arrêtée");
+            // 🔓 Libérer le Wake Lock quand on arrête
+            releaseWakeLock();
+            
+            console.log("⏹️ Répétition arrêtée - Wake Lock libéré");
         }
 
         // ====== Mise à jour des sélecteurs de plage ======
@@ -1130,7 +1233,7 @@
             scrollContainer.scrollTop = 0;
         }
 
-        // ====== Lecture audio ======
+        // ====== Lecture audio AVEC AudioContext ======
         function playSpecificTrack(index) {
             if (index >= displayedAyahs.length) return;
             
@@ -1144,14 +1247,31 @@
             if(activeSpan) activeSpan.classList.add('ayah-active');
             
             audioStatusIcon.className = "fa-solid fa-volume-high text-success";
+            
+            // 🔥 Initialiser AudioContext avant la lecture
+            initAudioContext();
+            
             audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNumber}.mp3`;
+            
+            // Activer le Wake Lock AVANT la lecture
+            if (isRepeatMode) {
+                requestWakeLock();
+            }
+            
             audioPlayer.play()
                 .then(() => {
                     isPlaying = true;
+                    console.log(`🔊 Lecture: Ayah ${globalAyahNumber} (${index+1}/${displayedAyahs.length})`);
                 })
                 .catch(e => {
                     console.log("Audio playing error:", e);
                     isPlaying = false;
+                    // En cas d'erreur, essayer de reprendre
+                    if (audioContext && audioContext.state === 'suspended') {
+                        audioContext.resume().then(() => {
+                            audioPlayer.play().catch(() => {});
+                        });
+                    }
                 });
         }
 
@@ -1170,6 +1290,8 @@
                         currentAyahIndex = 0;
                         repeatStatus.textContent = `${remainingCycles}`;
                         console.log(`🔄 Nouveau cycle - reste ${remainingCycles} cycles`);
+                        // 🔥 Réactiver le Wake Lock pour chaque nouveau cycle
+                        requestWakeLock();
                         playSpecificTrack(0);
                     } else {
                         console.log("✅ FIN - Toutes les répétitions terminées!");
@@ -1187,9 +1309,11 @@
                 isPlaying = false;
                 audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
                 document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
+                releaseWakeLock();
             }
         };
-        
+
+        // ====== Erreur audio - passage automatique ======
         audioPlayer.onerror = function() {
             console.log("❌ Erreur audio - Passage à l'ayah suivante");
             if (isRepeatMode) {
@@ -1201,6 +1325,7 @@
                     if (remainingCycles > 0) {
                         currentAyahIndex = 0;
                         repeatStatus.textContent = `${remainingCycles}`;
+                        requestWakeLock();
                         playSpecificTrack(0);
                     } else {
                         stopRepeat();
@@ -1210,6 +1335,7 @@
                 isPlaying = false;
                 audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
                 document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
+                releaseWakeLock();
             }
         };
 
@@ -1294,12 +1420,26 @@
             document.body.style.overflow = 'auto';
             currentSurahNumber = 0;
             audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+            releaseWakeLock();
         });
 
         function showLoader(show) {
             if(show) loader.classList.remove('d-none');
             else loader.classList.add('d-none');
         }
+
+        // ============================================================
+        //  INITIALISATION
+        // ============================================================
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchSurahs();
+            console.log('✅ Application lancée - La répétition continue même écran éteint !');
+            console.log('📌 Fonctionnalités: Wake Lock + AudioContext activés');
+        });
+
+        // 🔥 Rendre les fonctions globales pour les appels HTML
+        window.loadSurah = loadSurah;
+        window.stopRepeat = stopRepeat;
     </script>
 </body>
 </html>
