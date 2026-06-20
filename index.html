@@ -261,7 +261,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px 20px;
-            padding-bottom: 150px;
+            padding-bottom: 200px;  /* Augmenté pour éviter le chevauchement */
             -webkit-overflow-scrolling: touch;
             background-color: #ffffff;
         }
@@ -347,6 +347,7 @@
             padding: 10px 15px;
             z-index: 999;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            border-top: 2px solid var(--quran-green);
         }
 
         .reciter-info-badge {
@@ -525,6 +526,9 @@
                 font-size: 0.8rem;
                 padding: 5px 12px;
             }
+            .scrollable-content {
+                padding-bottom: 180px;
+            }
         }
 
         @media (max-width: 576px) {
@@ -570,7 +574,7 @@
             }
             .scrollable-content {
                 padding: 10px 12px;
-                padding-bottom: 130px;
+                padding-bottom: 160px;
             }
             .scrollable-content::after {
                 height: 20px;
@@ -663,6 +667,9 @@
             }
             .reciter-info-badge i {
                 font-size: 0.7rem;
+            }
+            .scrollable-content {
+                padding-bottom: 150px;
             }
         }
     </style>
@@ -900,8 +907,8 @@
         let repeatCount = 1;
         let isPlaying = false;
         let currentAyahIndex = 0;
-        let remainingCycles = 0;      // Nombre de cycles restants (décroissant)
-        let totalCycles = 0;          // Nombre total de cycles initial
+        let remainingCycles = 0;
+        let totalCycles = 0;
 
         // ====== Fonction pour mettre à jour l'affichage selon la plage ======
         function updateRangeDisplay() {
@@ -1000,10 +1007,9 @@
             repeatCount = Math.min(repeatVal, 99);
             
             if (!isRepeatMode) {
-                // Démarrer le mode répétition avec compteur décroissant
                 isRepeatMode = true;
                 currentAyahIndex = 0;
-                remainingCycles = repeatCount;  // Commencer par le nombre total
+                remainingCycles = repeatCount;
                 totalCycles = repeatCount;
                 
                 toggleRepeatBtn.innerHTML = '<i class="fa-solid fa-stop"></i> إيقاف';
@@ -1149,27 +1155,23 @@
                 });
         }
 
-        // ====== Gestion de la fin de lecture avec compteur DÉCROISSANT ======
+        // ====== Gestion de la fin de lecture ======
         audioPlayer.onended = function() {
             if (isRepeatMode) {
                 currentAyahIndex++;
                 
                 if (currentAyahIndex < displayedAyahs.length) {
-                    // Continuer dans le même cycle
                     console.log(`➡️ Lecture ayah ${currentAyahIndex+1}/${displayedAyahs.length} (reste ${remainingCycles} cycles)`);
                     playSpecificTrack(currentAyahIndex);
                 } else {
-                    // Fin du cycle actuel - Décrémenter le compteur
                     remainingCycles--;
                     
                     if (remainingCycles > 0) {
-                        // Recommencer un nouveau cycle
                         currentAyahIndex = 0;
                         repeatStatus.textContent = `${remainingCycles}`;
                         console.log(`🔄 Nouveau cycle - reste ${remainingCycles} cycles`);
                         playSpecificTrack(0);
                     } else {
-                        // FIN - Plus de cycles restants
                         console.log("✅ FIN - Toutes les répétitions terminées!");
                         Swal.fire({
                             icon: 'success',
