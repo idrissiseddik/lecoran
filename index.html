@@ -370,6 +370,81 @@
             font-size: 1rem;
         }
 
+        /* ====== Contrôles de répétition ====== */
+        .repeat-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .repeat-controls label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--quran-green);
+            margin: 0;
+        }
+
+        .repeat-input {
+            width: 60px;
+            height: 32px;
+            border: 2px solid var(--quran-green);
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 0 4px;
+        }
+
+        .repeat-input:focus {
+            border-color: var(--quran-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.25);
+            outline: none;
+        }
+
+        .repeat-status {
+            font-size: 0.75rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 2px 10px;
+            border-radius: 20px;
+            border: 1px solid #dee2e6;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .btn-repeat {
+            height: 32px;
+            padding: 0 14px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-repeat.active {
+            background-color: #dc3545;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .btn-repeat:not(.active) {
+            background-color: var(--quran-green);
+            color: white;
+        }
+
+        .btn-repeat:hover:not(.active) {
+            background-color: #0a3d26;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         /* ====== Loader ====== */
         #loader {
             position: fixed;
@@ -527,7 +602,6 @@
             .range-container {
                 gap: 4px;
             }
-            /* Amélioration des badges sur mobile */
             .ayah-number-badge {
                 min-width: 22px !important;
                 font-size: 0.65rem !important;
@@ -538,6 +612,25 @@
                 min-width: 28px !important;
                 font-size: 0.6rem !important;
                 padding: 0 3px !important;
+            }
+
+            .repeat-controls {
+                gap: 4px;
+            }
+            .repeat-input {
+                width: 45px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+            .repeat-status {
+                font-size: 0.65rem;
+                min-width: 60px;
+                padding: 1px 6px;
+            }
+            .btn-repeat {
+                height: 28px;
+                padding: 0 10px;
+                font-size: 0.7rem;
             }
         }
 
@@ -658,7 +751,7 @@
                 <select id="toAyahSelect" class="form-select form-select-sm ayah-range-select">
                     <option value="1">1</option>
                 </select>
-                <button id="applyRangeBtn" class="btn btn-success btn-sm">
+                <button id="applyRangeBtn" class="btn btn-success btn-sm" style="display:none;">
                     <i class="fa-solid fa-check"></i> عرض
                 </button>
                 <button id="fullSurahBtn" class="btn btn-outline-success btn-sm">
@@ -678,8 +771,20 @@
         <!-- Fixed Action Bar -->
         <div class="fixed-action-bar">
             <div class="reciter-info-badge" id="togglePlayBtn" title="اضغط للتوقيف أو التشغيل">
-                <i id="audioStatusIcon" class="fa-solid fa-volume-high text-success"></i>
+                <i id="audioStatusIcon" class="fa-solid fa-volume-mute text-secondary"></i>
                 <span>القارئ الحالي: <span id="selectedReciterName">مشاري العفاسي</span></span>
+            </div>
+
+            <!-- ====== Contrôles de répétition ====== -->
+            <div class="repeat-controls">
+                <label for="repeatCount">
+                    <i class="fa-solid fa-rotate-right"></i> التكرار:
+                </label>
+                <input type="number" id="repeatCount" class="repeat-input" value="3" min="1" max="99">
+                <span class="repeat-status" id="repeatStatus">--</span>
+                <button id="toggleRepeatBtn" class="btn-repeat">
+                    <i class="fa-solid fa-play"></i> تشغيل
+                </button>
             </div>
 
             <audio id="audioPlayer" class="d-none"></audio>
@@ -774,6 +879,11 @@
         const fullSurahBtn = document.getElementById('fullSurahBtn');
         const rangeInfo = document.getElementById('rangeInfo');
 
+        // ====== Contrôles de répétition ======
+        const repeatCountInput = document.getElementById('repeatCount');
+        const repeatStatus = document.getElementById('repeatStatus');
+        const toggleRepeatBtn = document.getElementById('toggleRepeatBtn');
+
         let currentAyahs = []; 
         let currentSurahNumber = 0;
         let currentSurahName = "";
@@ -785,25 +895,149 @@
         let displayedAyahs = [];
         let currentTrackIndex = 0;
 
+        // ====== Variables de répétition avec compteur DÉCROISSANT ======
+        let isRepeatMode = false;
+        let repeatCount = 1;
+        let isPlaying = false;
+        let currentAyahIndex = 0;
+        let remainingCycles = 0;      // Nombre de cycles restants (décroissant)
+        let totalCycles = 0;          // Nombre total de cycles initial
+
+        // ====== Fonction pour mettre à jour l'affichage selon la plage ======
+        function updateRangeDisplay() {
+            const from = parseInt(fromAyahSelect.value);
+            const to = parseInt(toAyahSelect.value);
+            
+            if (from > to) {
+                Swal.fire('تنبيه', 'رقم الآية الأولى يجب أن يكون أصغر من رقم الآية الأخيرة', 'warning');
+                fromAyahSelect.value = currentFromAyah;
+                toAyahSelect.value = currentToAyah;
+                return;
+            }
+            
+            currentFromAyah = from;
+            currentToAyah = to;
+            isFullSurah = false;
+            
+            displayedAyahs = currentAyahs.filter(ayah => 
+                ayah.numberInSurah >= from && ayah.numberInSurah <= to
+            );
+            
+            if (displayedAyahs.length === 0) {
+                Swal.fire('تنبيه', 'لا توجد آيات في هذا النطاق', 'warning');
+                return;
+            }
+            
+            rangeInfo.classList.remove('d-none');
+            rangeInfo.innerHTML = `📖 عرض الآيات من <strong>${from}</strong> إلى <strong>${to}</strong> (${displayedAyahs.length} آية)`;
+            
+            if (isRepeatMode) stopRepeat();
+            renderAyahs();
+        }
+
         document.addEventListener("DOMContentLoaded", fetchSurahs);
+
+        // ====== Écouteurs pour les changements automatiques ======
+        fromAyahSelect.addEventListener('change', function() {
+            if (currentSurahNumber !== 0) {
+                const from = parseInt(fromAyahSelect.value);
+                const to = parseInt(toAyahSelect.value);
+                if (from > to) {
+                    toAyahSelect.value = from;
+                }
+                updateRangeDisplay();
+            }
+        });
+
+        toAyahSelect.addEventListener('change', function() {
+            if (currentSurahNumber !== 0) {
+                const from = parseInt(fromAyahSelect.value);
+                const to = parseInt(toAyahSelect.value);
+                if (to < from) {
+                    fromAyahSelect.value = to;
+                }
+                updateRangeDisplay();
+            }
+        });
 
         reciterSelect.addEventListener('change', function() {
             selectedReciterName.innerText = reciterSelect.options[reciterSelect.selectedIndex].text;
-            if(currentSurahNumber !== 0) {
+            if(currentSurahNumber !== 0 && isPlaying) {
                 audioPlayer.pause();
+                isPlaying = false;
+                audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+            }
+            if (currentSurahNumber !== 0 && displayedAyahs.length > 0) {
                 renderAyahs();
             }
         });
 
         togglePlayBtn.addEventListener('click', function() {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                audioStatusIcon.className = "fa-solid fa-volume-high text-success";
-            } else {
+            if (audioPlayer.src && !audioPlayer.paused) {
                 audioPlayer.pause();
-                audioStatusIcon.className = "fa-solid fa-volume-xmark text-danger";
+                isPlaying = false;
+                audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+            } else if (audioPlayer.src) {
+                audioPlayer.play();
+                isPlaying = true;
+                audioStatusIcon.className = "fa-solid fa-volume-high text-success";
             }
         });
+
+        // ====== Gestion du bouton de répétition ======
+        toggleRepeatBtn.addEventListener('click', function() {
+            if (displayedAyahs.length === 0) {
+                Swal.fire('تنبيه', 'يرجى اختيار سورة أولاً', 'info');
+                return;
+            }
+            
+            const repeatVal = parseInt(repeatCountInput.value);
+            if (isNaN(repeatVal) || repeatVal < 1) {
+                Swal.fire('تنبيه', 'يرجى إدخال عدد صحيح أكبر من 0', 'warning');
+                return;
+            }
+            
+            repeatCount = Math.min(repeatVal, 99);
+            
+            if (!isRepeatMode) {
+                // Démarrer le mode répétition avec compteur décroissant
+                isRepeatMode = true;
+                currentAyahIndex = 0;
+                remainingCycles = repeatCount;  // Commencer par le nombre total
+                totalCycles = repeatCount;
+                
+                toggleRepeatBtn.innerHTML = '<i class="fa-solid fa-stop"></i> إيقاف';
+                toggleRepeatBtn.classList.add('active');
+                repeatStatus.textContent = `${remainingCycles}`;
+                audioStatusIcon.className = "fa-solid fa-volume-high text-success";
+                
+                console.log(`🔁 Début répétition: ${displayedAyahs.length} ayahs × ${repeatCount} fois (compteur décroissant)`);
+                
+                isPlaying = true;
+                playSpecificTrack(0);
+            } else {
+                stopRepeat();
+            }
+        });
+
+        function stopRepeat() {
+            isRepeatMode = false;
+            currentAyahIndex = 0;
+            remainingCycles = 0;
+            totalCycles = 0;
+            isPlaying = false;
+            
+            toggleRepeatBtn.innerHTML = '<i class="fa-solid fa-play"></i> تشغيل';
+            toggleRepeatBtn.classList.remove('active');
+            repeatStatus.textContent = '--';
+            audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+            
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
+            
+            console.log("⏹️ Répétition arrêtée");
+        }
 
         // ====== Mise à jour des sélecteurs de plage ======
         function updateRangeSelectors() {
@@ -824,35 +1058,6 @@
             toAyahSelect.value = totalAyahsInSurah;
         }
 
-        // ====== Appliquer la plage ======
-        function applyRange() {
-            const from = parseInt(fromAyahSelect.value);
-            const to = parseInt(toAyahSelect.value);
-            
-            if (from > to) {
-                Swal.fire('تنبيه', 'رقم الآية الأولى يجب أن يكون أصغر من رقم الآية الأخيرة', 'warning');
-                return;
-            }
-            
-            currentFromAyah = from;
-            currentToAyah = to;
-            isFullSurah = false;
-            
-            displayedAyahs = currentAyahs.filter(ayah => 
-                ayah.numberInSurah >= from && ayah.numberInSurah <= to
-            );
-            
-            if (displayedAyahs.length === 0) {
-                Swal.fire('تنبيه', 'لا توجد آيات في هذا النطاق', 'warning');
-                return;
-            }
-            
-            rangeInfo.classList.remove('d-none');
-            rangeInfo.innerHTML = `📖 عرض الآيات من <strong>${from}</strong> إلى <strong>${to}</strong> (${displayedAyahs.length} آية)`;
-            
-            renderAyahs();
-        }
-
         // ====== عرض السورة كاملة ======
         function loadFullSurah() {
             isFullSurah = true;
@@ -862,11 +1067,16 @@
             fromAyahSelect.value = 1;
             toAyahSelect.value = totalAyahsInSurah;
             
+            if (isRepeatMode) stopRepeat();
             renderAyahs();
         }
 
         // ====== Événements des boutons de plage ======
-        applyRangeBtn.addEventListener('click', applyRange);
+        applyRangeBtn.addEventListener('click', function() {
+            if (currentSurahNumber !== 0) {
+                updateRangeDisplay();
+            }
+        });
         fullSurahBtn.addEventListener('click', loadFullSurah);
 
         // ====== Fonction pour afficher les ayat ======
@@ -874,7 +1084,6 @@
             ayahsContainer.innerHTML = '';
             surahTitle.innerText = currentSurahName;
 
-            // Afficher la basmala seulement si c'est la sourate complète et pas sourate 1 ou 9
             if (isFullSurah && currentSurahNumber !== 1 && currentSurahNumber !== 9) {
                 basmalaContainer.classList.remove('d-none');
             } else {
@@ -883,7 +1092,6 @@
 
             displayedAyahs.forEach((ayah, index) => {
                 let text = ayah.text;
-                // Enlever la basmala du premier ayat si ce n'est pas sourate 1
                 if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ")) {
                     text = text.replace("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "").trim();
                 }
@@ -892,7 +1100,6 @@
                 span.className = 'ayah-span';
                 span.id = `ayah-${index}`;
                 
-                // Déterminer la classe du badge selon le nombre de chiffres
                 const ayahNum = ayah.numberInSurah;
                 let badgeClass = 'ayah-number-badge';
                 if (ayahNum >= 100) {
@@ -902,17 +1109,18 @@
                 span.innerHTML = `${text} <span class="${badgeClass}">${ayahNum}</span> `;
                 
                 span.addEventListener('click', function() {
+                    if (isRepeatMode) stopRepeat();
+                    currentTrackIndex = index;
+                    isPlaying = true;
+                    audioStatusIcon.className = "fa-solid fa-volume-high text-success";
                     playSpecificTrack(index);
                 });
 
                 ayahsContainer.appendChild(span);
             });
 
-            // Lire automatiquement la première ayah
-            if (displayedAyahs.length > 0) {
-                playSpecificTrack(0);
-            }
-            
+            currentTrackIndex = 0;
+            if (isRepeatMode) stopRepeat();
             scrollContainer.scrollTop = 0;
         }
 
@@ -931,26 +1139,75 @@
             
             audioStatusIcon.className = "fa-solid fa-volume-high text-success";
             audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNumber}.mp3`;
-            audioPlayer.play().catch(e => console.log("Audio playing..."));
+            audioPlayer.play()
+                .then(() => {
+                    isPlaying = true;
+                })
+                .catch(e => {
+                    console.log("Audio playing error:", e);
+                    isPlaying = false;
+                });
         }
 
+        // ====== Gestion de la fin de lecture avec compteur DÉCROISSANT ======
         audioPlayer.onended = function() {
-            currentTrackIndex++;
-            if (currentTrackIndex < displayedAyahs.length) {
-                playSpecificTrack(currentTrackIndex);
+            if (isRepeatMode) {
+                currentAyahIndex++;
+                
+                if (currentAyahIndex < displayedAyahs.length) {
+                    // Continuer dans le même cycle
+                    console.log(`➡️ Lecture ayah ${currentAyahIndex+1}/${displayedAyahs.length} (reste ${remainingCycles} cycles)`);
+                    playSpecificTrack(currentAyahIndex);
+                } else {
+                    // Fin du cycle actuel - Décrémenter le compteur
+                    remainingCycles--;
+                    
+                    if (remainingCycles > 0) {
+                        // Recommencer un nouveau cycle
+                        currentAyahIndex = 0;
+                        repeatStatus.textContent = `${remainingCycles}`;
+                        console.log(`🔄 Nouveau cycle - reste ${remainingCycles} cycles`);
+                        playSpecificTrack(0);
+                    } else {
+                        // FIN - Plus de cycles restants
+                        console.log("✅ FIN - Toutes les répétitions terminées!");
+                        Swal.fire({
+                            icon: 'success',
+                            title: '✅ تم الإستماع!',
+                            text: `تم الاستماع إلى ${displayedAyahs.length} آية ${totalCycles} مرات`,
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        stopRepeat();
+                    }
+                }
             } else {
-                currentTrackIndex = 0;
-                playSpecificTrack(0);
+                isPlaying = false;
+                audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+                document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
             }
         };
         
         audioPlayer.onerror = function() {
-            currentTrackIndex++;
-            if (currentTrackIndex < displayedAyahs.length) {
-                playSpecificTrack(currentTrackIndex);
+            console.log("❌ Erreur audio - Passage à l'ayah suivante");
+            if (isRepeatMode) {
+                currentAyahIndex++;
+                if (currentAyahIndex < displayedAyahs.length) {
+                    playSpecificTrack(currentAyahIndex);
+                } else {
+                    remainingCycles--;
+                    if (remainingCycles > 0) {
+                        currentAyahIndex = 0;
+                        repeatStatus.textContent = `${remainingCycles}`;
+                        playSpecificTrack(0);
+                    } else {
+                        stopRepeat();
+                    }
+                }
             } else {
-                currentTrackIndex = 0;
-                playSpecificTrack(0);
+                isPlaying = false;
+                audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
+                document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
             }
         };
 
@@ -1003,6 +1260,8 @@
                     displayedAyahs = [...currentAyahs];
                     rangeInfo.classList.add('d-none');
                     
+                    if (isRepeatMode) stopRepeat();
+                    
                     updateRangeSelectors();
                     fromAyahSelect.value = 1;
                     toAyahSelect.value = totalAyahsInSurah;
@@ -1022,13 +1281,17 @@
         }
 
         backBtn.addEventListener('click', function() {
+            if (isRepeatMode) stopRepeat();
+            
             audioPlayer.pause();
             audioPlayer.src = "";
+            isPlaying = false;
             surahListView.classList.remove('d-none');
             surahContentView.classList.add('d-none');
             backBtn.classList.add('d-none');
             document.body.style.overflow = 'auto';
             currentSurahNumber = 0;
+            audioStatusIcon.className = "fa-solid fa-volume-mute text-secondary";
         });
 
         function showLoader(show) {
