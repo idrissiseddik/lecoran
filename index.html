@@ -497,6 +497,228 @@
         .icon-sms { color: #0b5ed7; }
         .icon-call { color: #198754; }
 
+        /* ====== BOUTON DE RECHERCHE FLOTTANT ====== */
+        .search-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 1050;
+            background-color: var(--quran-gold);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 22px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-btn:hover {
+            transform: scale(1.05);
+            background-color: #b08a4a;
+            color: white;
+        }
+        .search-btn:active {
+            transform: scale(0.95);
+        }
+        .search-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* ====== OVERLAY DE RECHERCHE ====== */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            z-index: 1070;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(6px);
+            animation: fadeInOverlay 0.3s ease;
+        }
+        .search-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 25px;
+            max-width: 750px;
+            width: 100%;
+            max-height: 90vh;
+            padding: 25px 30px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            overflow-y: auto;
+            animation: slideUpSearch 0.35s ease;
+            position: relative;
+        }
+        @keyframes slideUpSearch {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .search-card .close-search {
+            position: absolute;
+            top: 12px;
+            left: 18px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #6c757d;
+            cursor: pointer;
+            transition: 0.3s;
+            line-height: 1;
+        }
+        .search-card .close-search:hover {
+            color: #dc3545;
+            transform: rotate(90deg);
+        }
+
+        .search-card .search-title {
+            color: var(--quran-green);
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-card .search-title i {
+            margin-left: 10px;
+            color: var(--quran-gold);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .search-input-wrapper input {
+            border: 2px solid var(--quran-green);
+            border-radius: 30px;
+            padding: 14px 22px;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+            transition: 0.3s;
+            background: #f8f9fa;
+        }
+        .search-input-wrapper input:focus {
+            border-color: var(--quran-gold);
+            box-shadow: 0 0 0 5px rgba(197, 160, 89, 0.2);
+            background: white;
+        }
+        .search-input-wrapper .search-submit {
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            background: var(--quran-green);
+            border: none;
+            color: white;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: bold;
+            transition: 0.3s;
+            height: calc(100% - 12px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .search-input-wrapper .search-submit:hover {
+            background: #0a3d26;
+        }
+
+        .search-stats {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background: #e8f5e9;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-item {
+            border-right: 4px solid var(--quran-gold);
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: 0.2s;
+            cursor: default;
+        }
+        .result-item:hover {
+            background: #e9ecef;
+        }
+        .result-item .surah-name {
+            font-weight: bold;
+            color: var(--quran-green);
+            font-size: 1rem;
+        }
+        .result-item .ayah-text {
+            font-size: 1.1rem;
+            line-height: 2rem;
+            color: #212529;
+            margin: 6px 0;
+        }
+        .result-item .ayah-num {
+            background: var(--quran-green);
+            color: white;
+            border-radius: 50px;
+            padding: 2px 14px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        .result-item .match-highlight {
+            background-color: var(--quran-highlight);
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--quran-green);
+        }
+
+        .result-item .go-to-ayah {
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        .result-item .go-to-ayah .btn-go {
+            background: var(--quran-green);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 16px;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .result-item .go-to-ayah .btn-go:hover {
+            background: #0a3d26;
+        }
+
+        .no-result {
+            text-align: center;
+            padding: 40px 0;
+            color: #6c757d;
+        }
+        .no-result i {
+            font-size: 3.5rem;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        .loading-spinner-search {
+            text-align: center;
+            padding: 30px;
+        }
+
         /* ====== Responsive ====== */
         @media (max-width: 768px) {
             .reciter-select {
@@ -530,6 +752,35 @@
             }
             .scrollable-content {
                 padding-bottom: 180px;
+            }
+            .search-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                bottom: 90px;
+                right: 15px;
+            }
+            .search-btn span {
+                display: none;
+            }
+            .search-btn i {
+                font-size: 1.4rem;
+                margin: 0;
+            }
+            .search-card {
+                padding: 20px;
+                max-height: 95vh;
+            }
+            .search-input-wrapper input {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+            .search-input-wrapper .search-submit {
+                padding: 6px 14px;
+                font-size: 0.8rem;
+            }
+            .result-item .ayah-text {
+                font-size: 1rem;
+                line-height: 1.8rem;
             }
         }
 
@@ -619,7 +870,6 @@
                 font-size: 0.6rem !important;
                 padding: 0 3px !important;
             }
-
             .repeat-controls {
                 gap: 4px;
             }
@@ -637,6 +887,19 @@
                 height: 28px;
                 padding: 0 10px;
                 font-size: 0.7rem;
+            }
+            .search-btn {
+                padding: 10px 14px;
+                bottom: 80px;
+                right: 12px;
+            }
+            .search-card {
+                padding: 15px;
+            }
+            .search-card .close-search {
+                font-size: 1.6rem;
+                top: 8px;
+                left: 12px;
             }
         }
 
@@ -672,6 +935,11 @@
             }
             .scrollable-content {
                 padding-bottom: 150px;
+            }
+            .search-btn {
+                padding: 8px 12px;
+                bottom: 75px;
+                right: 10px;
             }
         }
     </style>
@@ -800,6 +1068,36 @@
         </div>
     </div>
 
+    <!-- ====== BOUTON DE RECHERCHE FLOTTANT ====== -->
+    <button class="search-btn" id="openSearchBtn">
+        <i class="fa-solid fa-search"></i>
+        <span>بحث</span>
+    </button>
+
+    <!-- ====== OVERLAY DE RECHERCHE ====== -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-card">
+            <button class="close-search" id="closeSearchBtn">&times;</button>
+            <h5 class="search-title">
+                <i class="fa-solid fa-book-quran"></i> بحث في القرآن الكريم
+            </h5>
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" placeholder="أدخل كلمة أو جملة للبحث..." autofocus>
+                <button class="search-submit" id="searchSubmitBtn">
+                    <i class="fa-solid fa-search"></i> بحث
+                </button>
+            </div>
+            <div class="search-stats" id="searchStats"></div>
+            <div id="searchResults">
+                <div class="text-center text-muted py-4">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 2.8rem; opacity: 0.25;"></i>
+                    <p class="mt-3">ابحث عن أي كلمة في آيات القرآن الكريم</p>
+                    <small class="text-muted">سيتم عرض النتائج مع رقم السورة والآية</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ====== Footer ====== -->
     <footer class="app-footer text-center">
         <div class="container">
@@ -826,21 +1124,18 @@
         //  🚀 SOLUTION POUR CONTINUER LA RÉPÉTITION MÊME ÉCRAN ÉTEINT
         // ============================================================
         
-        // 1️⃣ Wake Lock API - Empêche l'écran de s'éteindre
         let wakeLock = null;
 
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
-                    // Libérer l'ancien verrou s'il existe
                     if (wakeLock !== null) {
                         try { await wakeLock.release(); } catch(e) {}
                         wakeLock = null;
                     }
                     wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('✅ Wake Lock activé - L\'écran restera allumé');
+                    console.log('✅ Wake Lock activé');
                     
-                    // Réactiver le verrou si la page redevient visible
                     document.addEventListener('visibilitychange', async () => {
                         if (document.visibilityState === 'visible' && wakeLock === null && isRepeatMode) {
                             try {
@@ -857,7 +1152,7 @@
                         wakeLock = null;
                     });
                 } else {
-                    console.warn('⚠️ Wake Lock API non supportée sur ce navigateur');
+                    console.warn('⚠️ Wake Lock API non supportée');
                 }
             } catch (err) {
                 console.warn('⚠️ Erreur Wake Lock:', err);
@@ -876,7 +1171,6 @@
             }
         }
 
-        // 2️⃣ AudioContext - Maintient le son actif en arrière-plan
         let audioContext = null;
 
         function initAudioContext() {
@@ -897,28 +1191,24 @@
             }
         }
 
-        // 3️⃣ Gestion de la visibilité de la page
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'visible') {
-                console.log('👁️ Application visible - Vérification du contexte audio');
+                console.log('👁️ Application visible');
                 if (audioContext && audioContext.state === 'suspended') {
                     audioContext.resume().catch(() => {});
                 }
                 if (isRepeatMode && isPlaying) {
-                    console.log('🔄 Reprise automatique de la lecture');
-                    // Vérifier si l'audio est toujours en cours
                     if (audioPlayer.paused && audioPlayer.src) {
                         audioPlayer.play().catch(() => {});
                     }
                 }
             } else {
-                console.log('📱 Application en arrière-plan - Maintien du contexte audio');
-                // Le son continue avec AudioContext
+                console.log('📱 Application en arrière-plan');
             }
         });
 
         // ============================================================
-        //  BOUTON "موافق" - SOLUTION DÉFINITIVE
+        //  BOUTON "موافق"
         // ============================================================
         (function() {
             "use strict";
@@ -976,14 +1266,12 @@
         const togglePlayBtn = document.getElementById('togglePlayBtn');
         const audioStatusIcon = document.getElementById('audioStatusIcon');
 
-        // ====== Sélecteurs de plage ======
         const fromAyahSelect = document.getElementById('fromAyahSelect');
         const toAyahSelect = document.getElementById('toAyahSelect');
         const applyRangeBtn = document.getElementById('applyRangeBtn');
         const fullSurahBtn = document.getElementById('fullSurahBtn');
         const rangeInfo = document.getElementById('rangeInfo');
 
-        // ====== Contrôles de répétition ======
         const repeatCountInput = document.getElementById('repeatCount');
         const repeatStatus = document.getElementById('repeatStatus');
         const toggleRepeatBtn = document.getElementById('toggleRepeatBtn');
@@ -999,13 +1287,278 @@
         let displayedAyahs = [];
         let currentTrackIndex = 0;
 
-        // ====== Variables de répétition avec compteur DÉCROISSANT ======
         let isRepeatMode = false;
         let repeatCount = 1;
         let isPlaying = false;
         let currentAyahIndex = 0;
         let remainingCycles = 0;
         let totalCycles = 0;
+
+        // ============================================================
+        //  MODULE DE RECHERCHE AVEC FONCTION DE NORMALISATION
+        // ============================================================
+        let allSurahsData = [];
+
+        // Fonction pour normaliser le texte arabe (enlever les diacritiques)
+        function normalizeArabic(text) {
+            return text
+                .replace(/[\u064B-\u0652]/g, '') // Supprimer les diacritiques (harakat)
+                .replace(/[أإآ]/g, 'ا') // Normaliser les Alifs
+                .replace(/ة/g, 'ه') // Normaliser Ta marbuta
+                .replace(/ي/g, 'ى') // Normaliser Ya
+                .replace(/ئ/g, 'ء') // Normaliser Hamza
+                .replace(/ؤ/g, 'ء')
+                .replace(/[\u0640]/g, ''); // Supprimer les tatweel
+        }
+
+        // Fonction pour charger toutes les sourates
+        async function loadAllSurahsForSearch() {
+            try {
+                const response = await fetch('https://api.alquran.cloud/v1/quran/ar.alafasy');
+                const data = await response.json();
+                if (data.code === 200) {
+                    allSurahsData = data.data.surahs;
+                    console.log('✅ Coran chargé pour la recherche :', allSurahsData.length, 'sourates');
+                    console.log('✅ Total versets chargés :', allSurahsData.reduce((acc, s) => acc + s.ayahs.length, 0));
+                    return allSurahsData;
+                } else {
+                    throw new Error('Erreur API');
+                }
+            } catch (error) {
+                console.error('Erreur chargement Coran:', error);
+                Swal.fire('خطأ', 'تعذر تحميل القرآن الكريم. تأكد من اتصالك بالإنترنت.', 'error');
+                return null;
+            }
+        }
+
+        // Fonction de recherche avec normalisation
+        function searchInQuran(query) {
+            if (!query.trim() || allSurahsData.length === 0) return [];
+            
+            const q = query.trim();
+            const qNormalized = normalizeArabic(q);
+            const results = [];
+            
+            console.log('🔍 Recherche de :', q, 'normalisé :', qNormalized);
+            
+            allSurahsData.forEach(surah => {
+                surah.ayahs.forEach(ayah => {
+                    // Normaliser le texte de l'ayah pour la recherche
+                    const ayahNormalized = normalizeArabic(ayah.text);
+                    
+                    // Rechercher la chaîne normalisée dans le texte normalisé
+                    if (ayahNormalized.includes(qNormalized)) {
+                        results.push({
+                            surahNumber: surah.number,
+                            surahName: surah.name,
+                            ayahNumber: ayah.numberInSurah,
+                            text: ayah.text,
+                            globalNumber: ayah.number
+                        });
+                    }
+                });
+            });
+            
+            console.log('✅ Résultats trouvés :', results.length);
+            return results;
+        }
+
+        // Fonction pour afficher les résultats
+        function displaySearchResults(results, query) {
+            const container = document.getElementById('searchResults');
+            const stats = document.getElementById('searchStats');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-result">
+                        <i class="fa-regular fa-face-frown"></i>
+                        <p>لم نجد أي آية تحتوي على "<strong>${query}</strong>"</p>
+                        <small class="text-muted">تأكد من كتابة الكلمة بشكل صحيح</small>
+                    </div>
+                `;
+                stats.textContent = 'لا توجد نتائج';
+                return;
+            }
+
+            // Grouper par sourate
+            const grouped = {};
+            results.forEach(item => {
+                const key = `${item.surahNumber}-${item.surahName}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        surahNumber: item.surahNumber,
+                        surahName: item.surahName,
+                        ayahs: []
+                    };
+                }
+                grouped[key].ayahs.push(item);
+            });
+
+            let html = '';
+            Object.keys(grouped).forEach(key => {
+                const group = grouped[key];
+                html += `<div class="mb-3">
+                    <h6 class="text-success fw-bold"><i class="fa-solid fa-book"></i> ${group.surahName} (${group.surahNumber})</h6>`;
+                group.ayahs.forEach(item => {
+                    // Mettre en surbrillance le mot recherché dans le texte original
+                    let highlightedText = item.text;
+                    // Créer une regex pour trouver le mot dans le texte original (en ignorant les diacritiques)
+                    const searchWords = query.trim().split(/\s+/);
+                    searchWords.forEach(word => {
+                        if (word.length > 1) {
+                            const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            // Créer un pattern qui ignore les diacritiques
+                            const pattern = escaped.replace(/[أإآ]/g, '[أإآا]');
+                            const regex = new RegExp(`(${pattern})`, 'gi');
+                            highlightedText = highlightedText.replace(regex, '<span class="match-highlight">$1</span>');
+                        }
+                    });
+                    
+                    html += `
+                        <div class="result-item">
+                            <div class="ayah-text">${highlightedText}</div>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="ayah-num">آية ${item.ayahNumber}</span>
+                                <div class="go-to-ayah">
+                                    <button class="btn-go" onclick="goToAyah(${item.surahNumber}, ${item.ayahNumber})">
+                                        <i class="fa-solid fa-eye"></i> عرض الآية
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+            stats.textContent = `🔍 العثور على ${results.length} آية تحتوي على "${query}" في ${Object.keys(grouped).length} سورة`;
+        }
+
+        // Fonction de recherche principale
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                Swal.fire('تنبيه', 'الرجاء إدخال كلمة للبحث', 'info');
+                return;
+            }
+
+            const container = document.getElementById('searchResults');
+            const stats = document.getElementById('searchStats');
+            
+            container.innerHTML = `
+                <div class="loading-spinner-search">
+                    <div class="spinner-border text-success" role="status"></div>
+                    <p class="mt-2 text-muted">جاري البحث...</p>
+                </div>
+            `;
+            stats.textContent = 'جاري البحث...';
+
+            // Charger les données si ce n'est pas déjà fait
+            if (allSurahsData.length === 0) {
+                const result = await loadAllSurahsForSearch();
+                if (!result) {
+                    container.innerHTML = `<div class="no-result"><p>حدث خطأ في تحميل البيانات</p></div>`;
+                    stats.textContent = 'خطأ';
+                    return;
+                }
+            }
+            
+            if (allSurahsData.length === 0) {
+                container.innerHTML = `<div class="no-result"><p>حدث خطأ في تحميل البيانات</p></div>`;
+                stats.textContent = 'خطأ';
+                return;
+            }
+
+            const results = searchInQuran(query);
+            displaySearchResults(results, query);
+        }
+
+        // Fonction pour aller à une ayah spécifique
+        window.goToAyah = async function(surahNumber, ayahNumber) {
+            document.getElementById('searchOverlay').classList.remove('active');
+            
+            if (currentSurahNumber === surahNumber) {
+                const ayahIndex = displayedAyahs.findIndex(a => a.numberInSurah === ayahNumber);
+                if (ayahIndex !== -1) {
+                    const el = document.getElementById(`ayah-${ayahIndex}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
+                        el.classList.add('ayah-active');
+                        setTimeout(() => el.classList.remove('ayah-active'), 3000);
+                    }
+                }
+            } else {
+                let surahName = '';
+                if (allSurahsData.length > 0) {
+                    const found = allSurahsData.find(s => s.number === surahNumber);
+                    if (found) surahName = found.name;
+                }
+                await loadSurah(surahNumber, surahName);
+                setTimeout(() => {
+                    const ayahIndex = displayedAyahs.findIndex(a => a.numberInSurah === ayahNumber);
+                    if (ayahIndex !== -1) {
+                        const el = document.getElementById(`ayah-${ayahIndex}`);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            el.classList.add('ayah-active');
+                            setTimeout(() => el.classList.remove('ayah-active'), 3000);
+                        }
+                    }
+                }, 500);
+            }
+        };
+
+        // ====== Gestion de l'overlay de recherche ======
+        const searchOverlay = document.getElementById('searchOverlay');
+        const openSearchBtn = document.getElementById('openSearchBtn');
+        const closeSearchBtn = document.getElementById('closeSearchBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchSubmitBtn = document.getElementById('searchSubmitBtn');
+
+        openSearchBtn.addEventListener('click', function() {
+            searchOverlay.classList.add('active');
+            searchInput.value = '';
+            document.getElementById('searchResults').innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 2.8rem; opacity: 0.25;"></i>
+                    <p class="mt-3">ابحث عن أي كلمة في آيات القرآن الكريم</p>
+                    <small class="text-muted">سيتم عرض النتائج مع رقم السورة والآية</small>
+                </div>
+            `;
+            document.getElementById('searchStats').textContent = '';
+            setTimeout(() => searchInput.focus(), 300);
+        });
+
+        function closeSearchOverlay() {
+            searchOverlay.classList.remove('active');
+        }
+
+        closeSearchBtn.addEventListener('click', closeSearchOverlay);
+        searchOverlay.addEventListener('click', function(e) {
+            if (e.target === searchOverlay) closeSearchOverlay();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchOverlay.classList.contains('active')) {
+                closeSearchOverlay();
+            }
+        });
+
+        searchSubmitBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+
+        // Charger le Coran pour la recherche au démarrage
+        loadAllSurahsForSearch();
+
+        // ============================================================
+        //  FIN MODULE DE RECHERCHE
+        // ============================================================
 
         // ====== Fonction pour mettre à jour l'affichage selon la plage ======
         function updateRangeDisplay() {
@@ -1039,7 +1592,7 @@
             renderAyahs();
         }
 
-        // ====== Écouteurs pour les changements automatiques ======
+        // ====== Écouteurs ======
         fromAyahSelect.addEventListener('change', function() {
             if (currentSurahNumber !== 0) {
                 const from = parseInt(fromAyahSelect.value);
@@ -1113,9 +1666,8 @@
                 repeatStatus.textContent = `${remainingCycles}`;
                 audioStatusIcon.className = "fa-solid fa-volume-high text-success";
                 
-                console.log(`🔁 Début répétition: ${displayedAyahs.length} ayahs × ${repeatCount} fois (compteur décroissant)`);
+                console.log(`🔁 Début répétition: ${displayedAyahs.length} ayahs × ${repeatCount} fois`);
                 
-                // 🔥 Activer le Wake Lock au début de la répétition
                 requestWakeLock();
                 initAudioContext();
                 
@@ -1142,10 +1694,9 @@
             audioPlayer.currentTime = 0;
             document.querySelectorAll('.ayah-span').forEach(s => s.classList.remove('ayah-active'));
             
-            // 🔓 Libérer le Wake Lock quand on arrête
             releaseWakeLock();
             
-            console.log("⏹️ Répétition arrêtée - Wake Lock libéré");
+            console.log("⏹️ Répétition arrêtée");
         }
 
         // ====== Mise à jour des sélecteurs de plage ======
@@ -1233,7 +1784,7 @@
             scrollContainer.scrollTop = 0;
         }
 
-        // ====== Lecture audio AVEC AudioContext ======
+        // ====== Lecture audio ======
         function playSpecificTrack(index) {
             if (index >= displayedAyahs.length) return;
             
@@ -1248,12 +1799,10 @@
             
             audioStatusIcon.className = "fa-solid fa-volume-high text-success";
             
-            // 🔥 Initialiser AudioContext avant la lecture
             initAudioContext();
             
             audioPlayer.src = `https://cdn.islamic.network/quran/audio/128/${reciter}/${globalAyahNumber}.mp3`;
             
-            // Activer le Wake Lock AVANT la lecture
             if (isRepeatMode) {
                 requestWakeLock();
             }
@@ -1266,7 +1815,6 @@
                 .catch(e => {
                     console.log("Audio playing error:", e);
                     isPlaying = false;
-                    // En cas d'erreur, essayer de reprendre
                     if (audioContext && audioContext.state === 'suspended') {
                         audioContext.resume().then(() => {
                             audioPlayer.play().catch(() => {});
@@ -1290,7 +1838,6 @@
                         currentAyahIndex = 0;
                         repeatStatus.textContent = `${remainingCycles}`;
                         console.log(`🔄 Nouveau cycle - reste ${remainingCycles} cycles`);
-                        // 🔥 Réactiver le Wake Lock pour chaque nouveau cycle
                         requestWakeLock();
                         playSpecificTrack(0);
                     } else {
@@ -1313,7 +1860,7 @@
             }
         };
 
-        // ====== Erreur audio - passage automatique ======
+        // ====== Erreur audio ======
         audioPlayer.onerror = function() {
             console.log("❌ Erreur audio - Passage à l'ayah suivante");
             if (isRepeatMode) {
@@ -1381,7 +1928,7 @@
                 if(data.code === 200) {
                     currentAyahs = data.data.ayahs;
                     currentSurahNumber = surahNumber;
-                    currentSurahName = surahName;
+                    currentSurahName = surahName || data.data.name;
                     totalAyahsInSurah = currentAyahs.length;
                     
                     isFullSurah = true;
@@ -1434,12 +1981,12 @@
         document.addEventListener("DOMContentLoaded", function() {
             fetchSurahs();
             console.log('✅ Application lancée - La répétition continue même écran éteint !');
-            console.log('📌 Fonctionnalités: Wake Lock + AudioContext activés');
+            console.log('📌 Fonctionnalités: Wake Lock + AudioContext + Recherche');
         });
 
-        // 🔥 Rendre les fonctions globales pour les appels HTML
         window.loadSurah = loadSurah;
         window.stopRepeat = stopRepeat;
+        window.goToAyah = goToAyah;
     </script>
 </body>
 </html>
